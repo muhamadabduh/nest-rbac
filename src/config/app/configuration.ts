@@ -12,8 +12,7 @@ export default () => ({
 		realm: process.env.KEYCLOAK_REALM,
 		adminClientId: process.env.KEYCLOAK_ADMIN_CLIENT_ID,
 		adminClientSecret: process.env.KEYCLOAK_ADMIN_CLIENT_SECRET,
-		webClientId: process.env.KEYCLOAK_WEB_CLIENT_ID,
-		webClientSecret: process.env.KEYCLOAK_WEB_CLIENT_SECRET,
+		publicKey: process.env.KEYCLOAK_PUBLIC_KEY,
 		grantType: process.env.KEYCLOAK_GRANT_TYPE,
 	},
 	redis: {

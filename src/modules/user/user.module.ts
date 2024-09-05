@@ -6,9 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from '../../entities/user.entity'
 import { KeycloakModule } from '../keycloak/keycloak-admin.module'
 import { KeycloakAdminService } from '../keycloak/keycloak-admin.service'
+import { AuthModule } from '../auth/auth.module'
 
 @Module({
-	imports: [ConfigModule, KeycloakModule, TypeOrmModule.forFeature([User])],
+	imports: [ConfigModule, KeycloakModule, AuthModule, TypeOrmModule.forFeature([User])],
 	controllers: [UserController],
 	providers: [UserService, KeycloakAdminService],
 })
