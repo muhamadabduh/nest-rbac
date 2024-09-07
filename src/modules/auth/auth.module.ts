@@ -15,6 +15,7 @@ import { AuthJwtGuard } from './auth-jwt.guard'
 			inject: [ConfigService],
 			useFactory: (config: ConfigService) => ({
 				publicKey: config.get('keycloak.publicKey'),
+				verifyOptions: { algorithms: ['RS256'] },
 			}),
 		}),
 	],

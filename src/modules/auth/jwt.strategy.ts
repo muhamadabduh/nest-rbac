@@ -22,7 +22,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   & Graphql Resolver using `@CurrentSession` param decorator. */
 	async validate(payload: AuthPayload): Promise<SessionPayload> {
 		// TODO: di sini harusnya pengecekan payload seperti: cek whitelist, cek field iss & aud, dll
-
+		console.log('hello', payload)
+		console.log('public key', this.config.get('keycloak.publicKey'))
 		return {
 			sid: payload.sid,
 			userId: payload.sub,
