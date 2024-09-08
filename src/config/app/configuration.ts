@@ -1,4 +1,5 @@
 import { config } from 'dotenv'
+import { base64Decode } from '../../common/helper/base64.helper'
 
 config()
 
@@ -12,7 +13,7 @@ export default () => ({
 		realm: process.env.KEYCLOAK_REALM,
 		adminClientId: process.env.KEYCLOAK_ADMIN_CLIENT_ID,
 		adminClientSecret: process.env.KEYCLOAK_ADMIN_CLIENT_SECRET,
-		publicKey: process.env.KEYCLOAK_PUBLIC_KEY,
+		publicKey: base64Decode(process.env.KEYCLOAK_PUBLIC_KEY),
 		grantType: process.env.KEYCLOAK_GRANT_TYPE,
 	},
 	redis: {
