@@ -11,6 +11,5 @@ export const schema = Joi.object({
 	KEYCLOAK_PUBLIC_KEY: Joi.string().required(),
 	REDIS_HOST: Joi.string().allow('').optional(),
 	REDIS_PORT: Joi.string().allow('').optional(),
-	REDIS_PASSWORD: Joi.string().allow('').optional(),
 	REDIS_TTL: Joi.string().allow('').optional(),
 })
