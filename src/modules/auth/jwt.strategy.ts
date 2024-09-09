@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
 import { Strategy, ExtractJwt } from 'passport-jwt'
-import { AuthPayload } from './auth-payload.interface'
-import { SessionPayload } from './session-payload.interface'
+import { SessionPayload, AuthPayload } from '../../common/interfaces/keycloak-user.interface'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -21,13 +20,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   req.user property. In turn, values returned here would be available inside REST Controller 
   & Graphql Resolver using `@CurrentSession` param decorator. */
 	async validate(payload: AuthPayload): Promise<SessionPayload> {
-		// TODO: di sini harusnya pengecekan payload seperti: cek whitelist, cek field iss & aud, dll
-		console.log('hello', payload)
-		console.log('public key', this.config.get('keycloak.publicKey'))
+		const permissions = payload.realm_access.roles
 		return {
 			sid: payload.sid,
 			userId: payload.sub,
 			name: payload.name,
+			permissions,
+			email: payload.email,
 		}
 	}
 }

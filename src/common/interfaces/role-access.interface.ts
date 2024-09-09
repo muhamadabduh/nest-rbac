@@ -1,4 +1,4 @@
 export interface RoleAccess {
-  ADMIN: string;
-  USER: string;
+	ADMIN: string
+	USER: string
 }

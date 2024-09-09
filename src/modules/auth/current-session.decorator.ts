@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
-import { SessionPayload } from './session-payload.interface'
+import { SessionPayload } from '../../common/interfaces/keycloak-user.interface'
 
 /* This is a param decorator for extracting "session" information stored in JWT payload. 
 This decorator is intended to be used along with `AuthJwtGuard`. 
