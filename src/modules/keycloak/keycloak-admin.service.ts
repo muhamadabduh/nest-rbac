@@ -3,6 +3,8 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Cache } from 'cache-manager'
+import { Response } from '../../common/interfaces/response.interface'
+import { RoleMappingPayload } from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation'
 
 @Injectable()
 export class KeycloakAdminService {
@@ -70,21 +72,34 @@ export class KeycloakAdminService {
 	}
 
 	// Method to assign roles to a user
-	// async assignRole(userId: string, roles: string[]) {
-	//   const roleRepresentations = await this.keycloakAdmin.roles.find({
-	//     realm: this.config.get('keycloak.realm'),
-	//   });
+	async assignRole(userId: string, roles: string[]) {
+		const roleRepresentations = await this.keycloakAdmin.roles.find({
+			realm: this.config.get('keycloak.realm'),
+		})
 
-	//   const rolesToAssign = roleRepresentations.filter((role) =>
-	//     roles.includes(role.name),
-	//   );
-
-	//   await this.keycloakAdmin.users.addRealmRoleMappings({
-	//     id: userId,
-	//     realm: this.config.get('keycloak.realm'),
-	//     roles: rolesToAssign,
-	//   });
-	// }
+		const rolesToAssign = roleRepresentations.filter((role) => roles.includes(role.name))
+		const roleMappingPayload: RoleMappingPayload[] = rolesToAssign.map((role) => ({
+			id: role.id,
+			name: role.name,
+		}))
+		await this.keycloakAdmin.users.addRealmRoleMappings({
+			id: userId,
+			realm: this.config.get('keycloak.realm'),
+			roles: roleMappingPayload,
+		})
+	}
 
 	// Additional methods for other Keycloak admin tasks can be added here
+	async getPermissions(name: string): Promise<Response<any>> {
+		const roleRepresentations = await this.keycloakAdmin.roles.find({
+			realm: this.config.get('keycloak.realm'),
+			search: name,
+		})
+
+		return {
+			status: true,
+			message: 'success fetch permissions',
+			data: roleRepresentations,
+		}
+	}
 }

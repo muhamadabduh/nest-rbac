@@ -15,7 +15,7 @@ export class UserService {
 	) {}
 
 	async create(createUserDto: CreateUserDto): Promise<User> {
-		const { name, email, password } = createUserDto
+		const { name, email, password, roles } = createUserDto
 
 		const newUser = new User()
 		newUser.name = name
@@ -23,7 +23,13 @@ export class UserService {
 		newUser.password = password
 		await this.userRepository.save(newUser)
 		// sync with keycloak
-		await this.keycloakAdminService.createUser(name, email, password)
+		const createdUser = await this.keycloakAdminService.createUser(name, email, password)
+
+		// assign roles
+		if (roles.length !== 0) {
+			await this.keycloakAdminService.assignRole(createdUser.id, roles)
+		}
+
 		return newUser
 	}
 
