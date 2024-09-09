@@ -26,9 +26,7 @@ export class UserService {
 		const createdUser = await this.keycloakAdminService.createUser(name, email, password)
 
 		// assign roles
-		if (roles.length !== 0) {
-			await this.keycloakAdminService.assignRole(createdUser.id, roles)
-		}
+		await this.keycloakAdminService.assignRole(createdUser.id, roles)
 
 		return newUser
 	}
