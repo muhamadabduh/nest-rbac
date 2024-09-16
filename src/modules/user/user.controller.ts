@@ -41,6 +41,6 @@ export class UserController {
 	@Delete(':id')
 	async remove(@Param('id') id: string) {
 		const user = await this.userService.findOne(id)
-		return this.userService.remove(id, user.email)
+		return this.userService.remove(id, user.authId)
 	}
 }

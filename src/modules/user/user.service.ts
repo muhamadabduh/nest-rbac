@@ -24,10 +24,26 @@ export class UserService {
 		newUser.password = password
 		await this.userRepository.save(newUser)
 		// sync with keycloak
-		const createdUser = await this.keycloakAdminService.createUser(name, email, password)
+		const createdUser = await this.keycloakAdminService.createUser(
+			name,
+			email,
+			password,
+			newUser.id.toString()
+		)
 
 		// assign roles
 		await this.keycloakAdminService.assignRole(createdUser.id, permissions)
+
+		// save keycloak userId to DB
+		await this.userRepository.updateOne(
+			{ _id: new ObjectId(newUser.id) },
+			{
+				$set: {
+					...newUser,
+					authId: createdUser.id,
+				},
+			}
+		)
 
 		return newUser
 	}
@@ -42,22 +58,41 @@ export class UserService {
 			const user = await this.userRepository.findOne({ where: { _id: new ObjectId(id) } })
 			if (!user) {
 				Logger.error('users not found')
+				return
 			}
-			return user
+			const { permissions } = await this.keycloakAdminService.findUser(user.authId)
+			return {
+				...user,
+				permissions,
+			}
 		} catch (error) {
 			Logger.error('error', error)
 		}
 	}
 
-	update(id: string, _updateUserDto: UpdateUserDto) {
-		return `This action updates a #${id} user`
+	async update(id: string, _updateUserDto: UpdateUserDto) {
+		try {
+			const { name, email, authId } = _updateUserDto
+
+			// update to db
+			await this.userRepository.updateOne({ _id: new ObjectId(id) }, { $set: { name, email } })
+
+			// update to keycloak
+			await this.keycloakAdminService.updateUser(authId, _updateUserDto)
+			Logger.log('success update user', { userId: id, payload: _updateUserDto })
+			return {
+				message: 'success update user',
+			}
+		} catch (error) {
+			Logger.error('error update user')
+		}
 	}
 
-	async remove(id: string, email: string) {
+	async remove(id: string, authId: string) {
 		// delete user from DB
 		await this.userRepository.findOneAndDelete({ _id: new ObjectId(id) })
 		// delete user from keycloak
-		await this.keycloakAdminService.deleteUser(email)
+		await this.keycloakAdminService.deleteUser(authId)
 		return {
 			message: 'success delete user',
 		}

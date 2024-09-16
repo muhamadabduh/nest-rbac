@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config'
 import { Cache } from 'cache-manager'
 import { Response } from '../../common/interfaces/response.interface'
 import { RoleMappingPayload } from '@keycloak/keycloak-admin-client/lib/defs/roleRepresentation'
+import { UpdateUserDto } from '../user/dto/update-user.dto'
 
 @Injectable()
 export class KeycloakAdminService {
@@ -41,7 +42,7 @@ export class KeycloakAdminService {
 	}
 
 	// Method to create a user in Keycloak
-	async createUser(username: string, email: string, password: string) {
+	async createUser(username: string, email: string, password: string, user_id: string) {
 		const newUser = await this.keycloakAdmin.users.create({
 			realm: this.config.get('keycloak.realm'),
 			username,
@@ -49,6 +50,9 @@ export class KeycloakAdminService {
 			enabled: true,
 			firstName: username,
 			credentials: [{ type: 'password', value: password, temporary: false }],
+			attributes: {
+				user_id,
+			},
 		})
 
 		return newUser
@@ -95,10 +99,36 @@ export class KeycloakAdminService {
 		})
 	}
 
-	async deleteUser(email: string) {
-		const users = await this.keycloakAdmin.users.find({ email })
-		const userId = users[0].id
-		await this.keycloakAdmin.users.del({ id: userId })
+	async deleteUser(authId: string) {
+		await this.keycloakAdmin.users.del({ id: authId })
+	}
+
+	async findUser(authId: string) {
+		const user = await this.keycloakAdmin.users.findOne({ id: authId })
+		const userPermissions = await this.keycloakAdmin.users.listRealmRoleMappings({
+			id: user.id,
+		})
+		const permissions = userPermissions.filter((permission) => permission.name.includes('rbac'))
+		return {
+			user: user,
+			permissions,
+		}
+	}
+
+	// update user without changing credentials
+	async updateUser(authId: string, _updateUserDto: UpdateUserDto) {
+		// update name and email
+		await this.keycloakAdmin.users.update(
+			{ id: authId },
+			{
+				firstName: _updateUserDto.name,
+				email: _updateUserDto.email,
+			}
+		)
+
+		// Next Todo sync permissions
+		// const initialPermissions = await this.keycloakAdmin.users.listRealmRoleMappings({ id: authId })
+		// const upcomingPermissions = _updateUserDto.permissions
 	}
 
 	// Additional methods for other Keycloak admin tasks can be added here
