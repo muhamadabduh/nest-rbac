@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from '../../entities/user.entity'
 import { MongoRepository } from 'typeorm'
 import { KeycloakAdminService } from '../keycloak/keycloak-admin.service'
+import { ObjectId } from 'mongodb'
 
 @Injectable()
 export class UserService {
@@ -15,7 +16,7 @@ export class UserService {
 	) {}
 
 	async create(createUserDto: CreateUserDto): Promise<User> {
-		const { name, email, password, roles } = createUserDto
+		const { name, email, password, permissions } = createUserDto
 
 		const newUser = new User()
 		newUser.name = name
@@ -26,24 +27,39 @@ export class UserService {
 		const createdUser = await this.keycloakAdminService.createUser(name, email, password)
 
 		// assign roles
-		await this.keycloakAdminService.assignRole(createdUser.id, roles)
+		await this.keycloakAdminService.assignRole(createdUser.id, permissions)
 
 		return newUser
 	}
 
-	findAll() {
-		return this.userRepository.find()
+	async findAll() {
+		const usersDb = await this.userRepository.find()
+		return usersDb
 	}
 
-	findOne(id: number) {
-		return `This action returns a #${id} user`
+	async findOne(id: string) {
+		try {
+			const user = await this.userRepository.findOne({ where: { _id: new ObjectId(id) } })
+			if (!user) {
+				Logger.error('users not found')
+			}
+			return user
+		} catch (error) {
+			Logger.error('error', error)
+		}
 	}
 
-	update(id: number, _updateUserDto: UpdateUserDto) {
+	update(id: string, _updateUserDto: UpdateUserDto) {
 		return `This action updates a #${id} user`
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} user`
+	async remove(id: string, email: string) {
+		// delete user from DB
+		await this.userRepository.findOneAndDelete({ _id: new ObjectId(id) })
+		// delete user from keycloak
+		await this.keycloakAdminService.deleteUser(email)
+		return {
+			message: 'success delete user',
+		}
 	}
 }

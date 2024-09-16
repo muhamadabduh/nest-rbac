@@ -35,6 +35,11 @@ export class KeycloakAdminService {
 		})
 	}
 
+	async findAll() {
+		const users = await this.keycloakAdmin.users.find()
+		return users
+	}
+
 	// Method to create a user in Keycloak
 	async createUser(username: string, email: string, password: string) {
 		const newUser = await this.keycloakAdmin.users.create({
@@ -42,6 +47,7 @@ export class KeycloakAdminService {
 			username,
 			email,
 			enabled: true,
+			firstName: username,
 			credentials: [{ type: 'password', value: password, temporary: false }],
 		})
 
@@ -87,6 +93,12 @@ export class KeycloakAdminService {
 			realm: this.config.get('keycloak.realm'),
 			roles: roleMappingPayload,
 		})
+	}
+
+	async deleteUser(email: string) {
+		const users = await this.keycloakAdmin.users.find({ email })
+		const userId = users[0].id
+		await this.keycloakAdmin.users.del({ id: userId })
 	}
 
 	// Additional methods for other Keycloak admin tasks can be added here
