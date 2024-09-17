@@ -6,7 +6,7 @@ import { AuthJwtGuard } from '../auth/auth-jwt.guard'
 import { Permissions } from '../auth/permission-guard/permissions.decorator'
 import { PermissionsGuard } from '../auth/permission-guard/permissions.guard'
 import { Permission } from 'src/common/enums/permissions.enum'
-const { USER_CREATE, USER_VIEW } = Permission
+const { USER_CREATE, USER_VIEW, USER_UPDATE, USER_DELETE } = Permission
 
 @Controller('user')
 export class UserController {
@@ -34,18 +34,17 @@ export class UserController {
 	}
 
 	@Patch(':id')
+	@UseGuards(AuthJwtGuard, PermissionsGuard)
+	@Permissions(USER_UPDATE)
 	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
 		return this.userService.update(id, updateUserDto)
 	}
 
 	@Delete(':id')
+	@UseGuards(AuthJwtGuard, PermissionsGuard)
+	@Permissions(USER_DELETE)
 	async remove(@Param('id') id: string) {
 		const user = await this.userService.findOne(id)
 		return this.userService.remove(id, user.authId)
-	}
-
-	@Get('delete/:id')
-	async deleteById(@Param('id') id: string) {
-		return this.userService.bulkDelete(id)
 	}
 }

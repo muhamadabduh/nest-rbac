@@ -69,7 +69,6 @@ export class UserService {
 				permissions,
 			}
 		} catch (error) {
-			console.log(error)
 			Logger.error('error', error)
 			throw new NotFoundException()
 		}
@@ -105,10 +104,5 @@ export class UserService {
 		return {
 			message: 'success delete user',
 		}
-	}
-
-	// temporary for flush user in the caprover
-	async bulkDelete(id: string) {
-		await this.userRepository.findOneAndDelete({ _id: new ObjectId(id) })
 	}
 }
