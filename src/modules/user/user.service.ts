@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -60,13 +60,18 @@ export class UserService {
 				Logger.error('users not found')
 				return
 			}
+			if (!user.authId) {
+				throw new NotFoundException()
+			}
 			const { permissions } = await this.keycloakAdminService.findUser(user.authId)
 			return {
 				...user,
 				permissions,
 			}
 		} catch (error) {
+			console.log(error)
 			Logger.error('error', error)
+			throw new NotFoundException()
 		}
 	}
 
@@ -85,6 +90,10 @@ export class UserService {
 			}
 		} catch (error) {
 			Logger.error('error update user')
+			return {
+				message: 'can not update user',
+				error: error.message,
+			}
 		}
 	}
 
@@ -96,5 +105,10 @@ export class UserService {
 		return {
 			message: 'success delete user',
 		}
+	}
+
+	// temporary for flush user in the caprover
+	async bulkDelete(id: string) {
+		await this.userRepository.findOneAndDelete({ _id: new ObjectId(id) })
 	}
 }

@@ -43,4 +43,9 @@ export class UserController {
 		const user = await this.userService.findOne(id)
 		return this.userService.remove(id, user.authId)
 	}
+
+	@Get('delete/:id')
+	async deleteById(@Param('id') id: string) {
+		return this.userService.bulkDelete(id)
+	}
 }
