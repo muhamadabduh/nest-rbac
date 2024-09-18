@@ -12,4 +12,5 @@ export const schema = Joi.object({
 	REDIS_HOST: Joi.string().allow('').optional(),
 	REDIS_PORT: Joi.string().allow('').optional(),
 	REDIS_TTL: Joi.string().allow('').optional(),
+	CORS_ORIGINS: Joi.string().required(),
 })

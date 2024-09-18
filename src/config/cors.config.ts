@@ -3,7 +3,7 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 import { ConfigService } from '@nestjs/config'
 
 export function corsOptions(configService: ConfigService): CorsOptions {
-	const allowedCorsOrigins = configService.get('app.cors_origins')
+	const allowedCorsOrigins = configService.get('app.corsOrigins')
 
 	return allowedCorsOrigins
 		? {

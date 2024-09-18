@@ -7,6 +7,7 @@ export default () => ({
 	app: {
 		env: process.env.APP_ENV,
 		port: process.env.APP_PORT,
+		corsOrigins: process.env.CORS_ORIGINS,
 	},
 	keycloak: {
 		url: process.env.KEYCLOAK_URL,
